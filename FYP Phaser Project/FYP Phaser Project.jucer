@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="kPX6Pt" name="FYP Phaser Project" projectType="audioplug"
               useAppConfig="0" addUsingNamespaceToJuceHeader="1" displaySplashScreen="1"
-              jucerFormatVersion="1">
+              jucerFormatVersion="1" cppLanguageStandard="17">
   <MAINGROUP id="fEnkPL" name="FYP Phaser Project">
     <GROUP id="{FC161583-0D96-5CCE-3AA2-AC64F5443A2B}" name="Source">
       <GROUP id="{A4F23CD4-D550-8126-B36A-9EE7A92C3B60}" name="DSP">
@@ -10,6 +10,8 @@
               file="Source/FirstOrderAllPassFilter.cpp"/>
         <FILE id="yFdAA7" name="FirstOrderAllPassFilter.h" compile="0" resource="0"
               file="Source/FirstOrderAllPassFilter.h"/>
+        <FILE id="Plyrab" name="LFO.cpp" compile="1" resource="0" file="Source/LFO.cpp"/>
+        <FILE id="d3AWLE" name="LFO.h" compile="0" resource="0" file="Source/LFO.h"/>
       </GROUP>
       <FILE id="TfUBXw" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

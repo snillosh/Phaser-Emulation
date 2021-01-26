@@ -22,9 +22,6 @@ FYPPhaserProjectAudioProcessor::FYPPhaserProjectAudioProcessor()
                        ), apvts(*this, nullptr, "Parameters", createParameters())
 #endif
 {
-    auto oscFunction = [] (float x) { return std::sin (x); };
-    osc.initialise (oscFunction);
-
     for (auto n = 0; n < numStages; ++n)
     {
         filters.add (new juce::dsp::FirstOrderTPTFilter<float>());
@@ -131,10 +128,6 @@ void FYPPhaserProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumInputChannels();
     spec.sampleRate = sampleRate;
-    //allPassFilter.prepare(spec);
-    //allPassFilter.reset();
-    osc.prepare (spec);
-    osc.reset();
     for (auto n = 0; n < numStages; ++n)
     {
         filters[n]->prepare (spec);
@@ -178,10 +171,11 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
 {
     rate = *apvts.getRawParameterValue("RATE");
     depth = *apvts.getRawParameterValue("DEPTH");
-    osc.setFrequency (rate);
+    lfo.setFrequency(rate);
     for (auto n = 0; n < numStages; ++n)
     {
-        //filters[n]->setCutoffFrequency(freq);
+        float phasePositionInHertz = (lfo.nextSample() * 20000.0f);
+        filters[n]->setCutoffFrequency(phasePositionInHertz);
     }
 }
 
@@ -209,18 +203,15 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
             float filter4 = filters[3]->processSample(channel, filter3);
             channelData [sample] = filter4;
              */
-            for (auto n = 0; n < numStages; ++n)
-            {
-                updateFilter();
-                float allPassOut1 = filters[0]->processSample(channel, channelData[sample]);
-                float allPassOut2 = filters[1]->processSample(channel, allPassOut1);
-                float allPassOut3 = filters[2]->processSample(channel, allPassOut2);
-                float allPassOut4 = filters[3]->processSample(channel, allPassOut3);
-                float allPassOut5 = filters[4]->processSample(channel, allPassOut4);
-                float allPassOut6 = filters[5]->processSample(channel, allPassOut5);
+            updateFilter();
+            float allPassOut1 = filters[0]->processSample(channel, channelData[sample]);
+            float allPassOut2 = filters[1]->processSample(channel, allPassOut1);
+            float allPassOut3 = filters[2]->processSample(channel, allPassOut2);
+            float allPassOut4 = filters[3]->processSample(channel, allPassOut3);
+            float allPassOut5 = filters[4]->processSample(channel, allPassOut4);
+            float allPassOut6 = filters[5]->processSample(channel, allPassOut5);
                 
-                channelData[sample] = (depth * allPassOut6) + ((1.0f - depth) * channelData[sample]);
-            }
+            channelData[sample] = (depth * allPassOut6) + ((1.0f - depth) * channelData[sample]);
         }
     }
     

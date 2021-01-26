@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include <array>
+#include "LFO.h"
 
 //==============================================================================
 /**
@@ -66,12 +67,12 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FYPPhaserProjectAudioProcessor)
     float lastSampleRate;
     OwnedArray<juce::dsp::FirstOrderTPTFilter<float>> filters;
-    juce::dsp::Oscillator<float> osc;
-    SmoothedValue<float, ValueSmoothingTypes::Linear> oscVolume;
+    SinOscillator lfo;
     
     float rate = 1.0f, depth = 0.5f, feedback = 0.0f, mix = 0.5f;
     float centreFrequency = 1300.0f;
     int numStages = 6;
+    double sampleRate = 44100.0;
     
     AudioProcessorValueTreeState::ParameterLayout createParameters();
 };
