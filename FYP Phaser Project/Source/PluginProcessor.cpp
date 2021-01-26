@@ -128,6 +128,7 @@ void FYPPhaserProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumInputChannels();
     spec.sampleRate = sampleRate;
+    lfo.setSampleRate(sampleRate);
     for (auto n = 0; n < numStages; ++n)
     {
         filters[n]->prepare (spec);
@@ -171,10 +172,11 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
 {
     rate = *apvts.getRawParameterValue("RATE");
     depth = *apvts.getRawParameterValue("DEPTH");
+    feedback = *apvts.getRawParameterValue("FEEDBACK");
     lfo.setFrequency(rate);
     for (auto n = 0; n < numStages; ++n)
     {
-        float phasePositionInHertz = (lfo.nextSample() * 20000.0f);
+        float phasePositionInHertz = ((lfo.nextSample() * 4752.0f) + 48.0f);
         filters[n]->setCutoffFrequency(phasePositionInHertz);
     }
 }
@@ -204,14 +206,14 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
             channelData [sample] = filter4;
              */
             updateFilter();
-            float allPassOut1 = filters[0]->processSample(channel, channelData[sample]);
+            float allPassOut1 = filters[0]->processSample(channel, channelData[sample]) + (allPassOutFinal * feedback);
             float allPassOut2 = filters[1]->processSample(channel, allPassOut1);
             float allPassOut3 = filters[2]->processSample(channel, allPassOut2);
             float allPassOut4 = filters[3]->processSample(channel, allPassOut3);
             float allPassOut5 = filters[4]->processSample(channel, allPassOut4);
-            float allPassOut6 = filters[5]->processSample(channel, allPassOut5);
+            allPassOutFinal = filters[5]->processSample(channel, allPassOut5);
                 
-            channelData[sample] = (depth * allPassOut6) + ((1.0f - depth) * channelData[sample]);
+            channelData[sample] = (depth * allPassOutFinal) + ((1.0f - depth) * channelData[sample]);
         }
     }
     
@@ -255,7 +257,7 @@ AudioProcessorValueTreeState::ParameterLayout FYPPhaserProjectAudioProcessor::cr
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
     params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.02f, 10.0f, 0.5f));
     params.push_back(std::make_unique<AudioParameterFloat>("DEPTH", "Depth", 0.1f, 1.0f, 0.5f));
-    params.push_back(std::make_unique<AudioParameterFloat>("GAIN", "Gain", 0.1f, 1.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("FEEDBACK", "Feedback", 0.1f, 1.0f, 0.5f));
     
     return {params.begin(), params.end() };
 }

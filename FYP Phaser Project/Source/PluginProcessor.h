@@ -73,6 +73,7 @@ private:
     float centreFrequency = 1300.0f;
     int numStages = 6;
     double sampleRate = 44100.0;
+    float allPassOutFinal = 1.0f;
     
     AudioProcessorValueTreeState::ParameterLayout createParameters();
 };

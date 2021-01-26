@@ -18,6 +18,8 @@ public:
     
     ~SinOscillator();
     
+    void setSampleRate(float newSampleRate);
+    
     float nextSample();
     
     void setFrequency (float frequency);

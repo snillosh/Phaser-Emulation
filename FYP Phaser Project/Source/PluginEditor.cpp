@@ -24,15 +24,15 @@ FYPPhaserProjectAudioProcessorEditor::FYPPhaserProjectAudioProcessorEditor (FYPP
     depthSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
     addAndMakeVisible(depthSlider);
     
-    gainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    gainSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
-    addAndMakeVisible(gainSlider);
+    feedbackSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    feedbackSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(feedbackSlider);
     
     rateSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RATE", rateSlider);
     
-    depthSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RES", depthSlider);
+    depthSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "DEPTH", depthSlider);
     
-    gainSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "GAIN", gainSlider);
+    feedbackSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "FEEDBACK", feedbackSlider);
 }
 
 FYPPhaserProjectAudioProcessorEditor::~FYPPhaserProjectAudioProcessorEditor()
@@ -49,5 +49,5 @@ void FYPPhaserProjectAudioProcessorEditor::resized()
 {
     rateSlider.setBounds(0, 0, 200, 100);
     depthSlider.setBounds(200, 100, 200, 100);
-    gainSlider.setBounds(0, 100, 200, 100);
+    feedbackSlider.setBounds(0, 100, 200, 100);
 }

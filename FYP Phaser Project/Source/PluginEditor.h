@@ -29,11 +29,11 @@ private:
     // access the processor object that created it.
     Slider rateSlider;
     Slider depthSlider;
-    Slider gainSlider;
+    Slider feedbackSlider;
     
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> rateSliderAttachment;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> depthSliderAttachment;
-    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> gainSliderAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> feedbackSliderAttachment;
     
     FYPPhaserProjectAudioProcessor& audioProcessor;
 
