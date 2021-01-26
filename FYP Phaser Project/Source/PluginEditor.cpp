@@ -16,6 +16,23 @@ FYPPhaserProjectAudioProcessorEditor::FYPPhaserProjectAudioProcessorEditor (FYPP
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
+    freqSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    freqSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(freqSlider);
+    
+    resSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    resSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(resSlider);
+    
+    gainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    gainSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(gainSlider);
+    
+    freqSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "FREQ", freqSlider);
+    
+    resSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RES", resSlider);
+    
+    gainSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "GAIN", gainSlider);
 }
 
 FYPPhaserProjectAudioProcessorEditor::~FYPPhaserProjectAudioProcessorEditor()
@@ -25,16 +42,12 @@ FYPPhaserProjectAudioProcessorEditor::~FYPPhaserProjectAudioProcessorEditor()
 //==============================================================================
 void FYPPhaserProjectAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+    g.fillAll(Colours::black);
 }
 
 void FYPPhaserProjectAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    freqSlider.setBounds(0, 0, 200, 100);
+    resSlider.setBounds(200, 100, 200, 100);
+    gainSlider.setBounds(0, 100, 200, 100);
 }

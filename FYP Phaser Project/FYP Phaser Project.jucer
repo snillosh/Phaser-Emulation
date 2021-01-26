@@ -5,6 +5,12 @@
               jucerFormatVersion="1">
   <MAINGROUP id="fEnkPL" name="FYP Phaser Project">
     <GROUP id="{FC161583-0D96-5CCE-3AA2-AC64F5443A2B}" name="Source">
+      <GROUP id="{A4F23CD4-D550-8126-B36A-9EE7A92C3B60}" name="DSP">
+        <FILE id="SmSTB2" name="FirstOrderAllPassFilter.cpp" compile="1" resource="0"
+              file="Source/FirstOrderAllPassFilter.cpp"/>
+        <FILE id="yFdAA7" name="FirstOrderAllPassFilter.h" compile="0" resource="0"
+              file="Source/FirstOrderAllPassFilter.h"/>
+      </GROUP>
       <FILE id="TfUBXw" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="K0nERt" name="PluginProcessor.h" compile="0" resource="0"

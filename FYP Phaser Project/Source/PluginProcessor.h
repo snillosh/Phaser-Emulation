@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <array>
 
 //==============================================================================
 /**
@@ -48,12 +49,18 @@ public:
     void setCurrentProgram (int index) override;
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
+    void updateFilter();
 
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-
+    
+    AudioProcessorValueTreeState apvts;
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FYPPhaserProjectAudioProcessor)
+    float lastSampleRate;
+    //std::array<dsp::ProcessorDuplicator<dsp::IIR::Filter <float>, dsp::IIR::Coefficients <float> >, 10> allPassFilters;
+    dsp::ProcessorDuplicator<dsp::IIR::Filter <float>, dsp::IIR::Coefficients <float> > allPassFilter;
+    AudioProcessorValueTreeState::ParameterLayout createParameters();
 };
