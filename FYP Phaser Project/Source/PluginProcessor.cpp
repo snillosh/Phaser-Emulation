@@ -152,7 +152,9 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
     lfo.setFrequency(rate);
     for (auto n = 0; n < numStages; ++n)
     {
-        float phasePositionInHertz = ((lfo.nextSample() * 4752.0f) + 48.0f);
+        float phasePositionInHertz = ((lfo.nextSample() * 12650.0f) + 550.0f);
+        if (phasePositionInHertz < 0)
+            phasePositionInHertz = phasePositionInHertz * -1.0f;
         filters[n]->setCutoffFrequency(phasePositionInHertz);
     }
 }
@@ -220,7 +222,7 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 AudioProcessorValueTreeState::ParameterLayout FYPPhaserProjectAudioProcessor::createParameters()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
-    params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.02f, 10.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.002f, 1.000f, 0.020f));
     params.push_back(std::make_unique<AudioParameterFloat>("DEPTH", "Depth", 0.1f, 1.0f, 0.5f));
     params.push_back(std::make_unique<AudioParameterFloat>("FEEDBACK", "Feedback", 0.1f, 1.0f, 0.5f));
     

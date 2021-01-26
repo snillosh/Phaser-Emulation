@@ -24,12 +24,12 @@ SinOscillator::~SinOscillator()
 
 float SinOscillator::nextSample()
 {
-    phaseIncrement = (M_2_PI * oscillatorFrequency) / sampleRate;
+    phaseIncrement = (MathConstants<float>::twoPi * oscillatorFrequency) / sampleRate;
     
     phasePosition = phasePosition + phaseIncrement;
-    if (phasePosition > M_2_PI)
+    if (phasePosition > MathConstants<float>::twoPi)
     {
-        phasePosition = phasePosition - M_2_PI;
+        phasePosition = phasePosition - MathConstants<float>::twoPi;
     }
     return std::sin(phasePosition);
 }
