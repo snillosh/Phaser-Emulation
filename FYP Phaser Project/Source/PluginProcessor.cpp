@@ -19,10 +19,17 @@ FYPPhaserProjectAudioProcessor::FYPPhaserProjectAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), allPassFilter(dsp::IIR::Coefficients<float>::makeLowPass(44100, 20000, 0.1f)),
-                        apvts(*this, nullptr, "Parameters", createParameters())
+                       ), apvts(*this, nullptr, "Parameters", createParameters())
 #endif
 {
+    auto oscFunction = [] (float x) { return std::sin (x); };
+    osc.initialise (oscFunction);
+
+    for (auto n = 0; n < numStages; ++n)
+    {
+        filters.add (new juce::dsp::FirstOrderTPTFilter<float>());
+        filters[n]->setType (juce::dsp::FirstOrderTPTFilterType::allpass);
+    }
 }
 
 FYPPhaserProjectAudioProcessor::~FYPPhaserProjectAudioProcessor()
@@ -30,6 +37,31 @@ FYPPhaserProjectAudioProcessor::~FYPPhaserProjectAudioProcessor()
 }
 
 //==============================================================================
+void FYPPhaserProjectAudioProcessor::setRate(float newRate)
+{
+    rate = newRate;
+}
+
+void FYPPhaserProjectAudioProcessor::setDepth(float newDepth)
+{
+    depth = newDepth;
+}
+
+void FYPPhaserProjectAudioProcessor::setCentreFrequency(float newCentreFrequecy)
+{
+    centreFrequency = newCentreFrequecy;
+}
+
+void FYPPhaserProjectAudioProcessor::setFeedback(float newFeedback)
+{
+    feedback = newFeedback;
+}
+
+void FYPPhaserProjectAudioProcessor::setMix(float newMix)
+{
+    mix = newMix;
+}
+
 const juce::String FYPPhaserProjectAudioProcessor::getName() const
 {
     return JucePlugin_Name;
@@ -99,8 +131,15 @@ void FYPPhaserProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumInputChannels();
     spec.sampleRate = sampleRate;
-    allPassFilter.prepare(spec);
-    allPassFilter.reset();
+    //allPassFilter.prepare(spec);
+    //allPassFilter.reset();
+    osc.prepare (spec);
+    osc.reset();
+    for (auto n = 0; n < numStages; ++n)
+    {
+        filters[n]->prepare (spec);
+        filters[n]->reset();
+    }
 }
 
 void FYPPhaserProjectAudioProcessor::releaseResources()
@@ -137,9 +176,13 @@ bool FYPPhaserProjectAudioProcessor::isBusesLayoutSupported (const BusesLayout& 
 
 void FYPPhaserProjectAudioProcessor::updateFilter()
 {
-    float freq = *apvts.getRawParameterValue("FREQ");
-    float res = *apvts.getRawParameterValue("RES");
-    *allPassFilter.state = *dsp::IIR::Coefficients<float>::makeLowPass(lastSampleRate, freq, res);
+    rate = *apvts.getRawParameterValue("RATE");
+    depth = *apvts.getRawParameterValue("DEPTH");
+    osc.setFrequency (rate);
+    for (auto n = 0; n < numStages; ++n)
+    {
+        //filters[n]->setCutoffFrequency(freq);
+    }
 }
 
 void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -152,8 +195,34 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         buffer.clear (i, 0, buffer.getNumSamples());
     
     dsp::AudioBlock<float> block (buffer);
-    updateFilter();
-    allPassFilter.process(dsp::ProcessContextReplacing<float>(block));
+    //allPassFilter.process(dsp::ProcessContextReplacing<float>(block));
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            /*
+            float filter1 = filters[0]->processSample(channel, channelData[sample]);
+            float filter2 = filters[1]->processSample(channel, filter1);
+            float filter3 = filters[2]->processSample(channel, filter2);
+            float filter4 = filters[3]->processSample(channel, filter3);
+            channelData [sample] = filter4;
+             */
+            for (auto n = 0; n < numStages; ++n)
+            {
+                updateFilter();
+                float allPassOut1 = filters[0]->processSample(channel, channelData[sample]);
+                float allPassOut2 = filters[1]->processSample(channel, allPassOut1);
+                float allPassOut3 = filters[2]->processSample(channel, allPassOut2);
+                float allPassOut4 = filters[3]->processSample(channel, allPassOut3);
+                float allPassOut5 = filters[4]->processSample(channel, allPassOut4);
+                float allPassOut6 = filters[5]->processSample(channel, allPassOut5);
+                
+                channelData[sample] = (depth * allPassOut6) + ((1.0f - depth) * channelData[sample]);
+            }
+        }
+    }
     
     
 }
@@ -193,8 +262,8 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 AudioProcessorValueTreeState::ParameterLayout FYPPhaserProjectAudioProcessor::createParameters()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
-    params.push_back(std::make_unique<AudioParameterFloat>("FREQ", "Freq", 0.1f, 20000.0f, 2000.0f));
-    params.push_back(std::make_unique<AudioParameterFloat>("RES", "Res", 0.1f, 5.0f, 2.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.02f, 10.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH", "Depth", 0.1f, 1.0f, 0.5f));
     params.push_back(std::make_unique<AudioParameterFloat>("GAIN", "Gain", 0.1f, 1.0f, 0.5f));
     
     return {params.begin(), params.end() };

@@ -16,21 +16,21 @@ FYPPhaserProjectAudioProcessorEditor::FYPPhaserProjectAudioProcessorEditor (FYPP
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize (400, 300);
-    freqSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    freqSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
-    addAndMakeVisible(freqSlider);
+    rateSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    rateSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(rateSlider);
     
-    resSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    resSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
-    addAndMakeVisible(resSlider);
+    depthSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    depthSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(depthSlider);
     
     gainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     gainSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
     addAndMakeVisible(gainSlider);
     
-    freqSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "FREQ", freqSlider);
+    rateSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RATE", rateSlider);
     
-    resSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RES", resSlider);
+    depthSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RES", depthSlider);
     
     gainSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "GAIN", gainSlider);
 }
@@ -47,7 +47,7 @@ void FYPPhaserProjectAudioProcessorEditor::paint (juce::Graphics& g)
 
 void FYPPhaserProjectAudioProcessorEditor::resized()
 {
-    freqSlider.setBounds(0, 0, 200, 100);
-    resSlider.setBounds(200, 100, 200, 100);
+    rateSlider.setBounds(0, 0, 200, 100);
+    depthSlider.setBounds(200, 100, 200, 100);
     gainSlider.setBounds(0, 100, 200, 100);
 }

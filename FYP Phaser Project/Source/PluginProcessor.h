@@ -50,6 +50,11 @@ public:
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
     void updateFilter();
+    void setRate(float newRate);
+    void setDepth(float newDepth);
+    void setCentreFrequency(float newCentreFrequecy);
+    void setFeedback (float newFeedback);
+    void setMix (float newMix);
 
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
@@ -60,7 +65,13 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FYPPhaserProjectAudioProcessor)
     float lastSampleRate;
-    //std::array<dsp::ProcessorDuplicator<dsp::IIR::Filter <float>, dsp::IIR::Coefficients <float> >, 10> allPassFilters;
-    dsp::ProcessorDuplicator<dsp::IIR::Filter <float>, dsp::IIR::Coefficients <float> > allPassFilter;
+    OwnedArray<juce::dsp::FirstOrderTPTFilter<float>> filters;
+    juce::dsp::Oscillator<float> osc;
+    SmoothedValue<float, ValueSmoothingTypes::Linear> oscVolume;
+    
+    float rate = 1.0f, depth = 0.5f, feedback = 0.0f, mix = 0.5f;
+    float centreFrequency = 1300.0f;
+    int numStages = 6;
+    
     AudioProcessorValueTreeState::ParameterLayout createParameters();
 };

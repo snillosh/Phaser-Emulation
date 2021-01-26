@@ -27,12 +27,12 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    Slider freqSlider;
-    Slider resSlider;
+    Slider rateSlider;
+    Slider depthSlider;
     Slider gainSlider;
     
-    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> freqSliderAttachment;
-    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> resSliderAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> rateSliderAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> depthSliderAttachment;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> gainSliderAttachment;
     
     FYPPhaserProjectAudioProcessor& audioProcessor;
