@@ -34,30 +34,6 @@ FYPPhaserProjectAudioProcessor::~FYPPhaserProjectAudioProcessor()
 }
 
 //==============================================================================
-void FYPPhaserProjectAudioProcessor::setRate(float newRate)
-{
-    rate = newRate;
-}
-
-void FYPPhaserProjectAudioProcessor::setDepth(float newDepth)
-{
-    depth = newDepth;
-}
-
-void FYPPhaserProjectAudioProcessor::setCentreFrequency(float newCentreFrequecy)
-{
-    centreFrequency = newCentreFrequecy;
-}
-
-void FYPPhaserProjectAudioProcessor::setFeedback(float newFeedback)
-{
-    feedback = newFeedback;
-}
-
-void FYPPhaserProjectAudioProcessor::setMix(float newMix)
-{
-    mix = newMix;
-}
 
 const juce::String FYPPhaserProjectAudioProcessor::getName() const
 {
@@ -190,21 +166,12 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    dsp::AudioBlock<float> block (buffer);
-    //allPassFilter.process(dsp::ProcessContextReplacing<float>(block));
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         auto* channelData = buffer.getWritePointer(channel);
         
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
-            /*
-            float filter1 = filters[0]->processSample(channel, channelData[sample]);
-            float filter2 = filters[1]->processSample(channel, filter1);
-            float filter3 = filters[2]->processSample(channel, filter2);
-            float filter4 = filters[3]->processSample(channel, filter3);
-            channelData [sample] = filter4;
-             */
             updateFilter();
             float allPassOut1 = filters[0]->processSample(channel, channelData[sample]) + (allPassOutFinal * feedback);
             float allPassOut2 = filters[1]->processSample(channel, allPassOut1);
@@ -216,8 +183,6 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
             channelData[sample] = (depth * allPassOutFinal) + ((1.0f - depth) * channelData[sample]);
         }
     }
-    
-    
 }
 
 //==============================================================================

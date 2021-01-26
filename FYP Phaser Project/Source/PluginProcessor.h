@@ -51,17 +51,13 @@ public:
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
     void updateFilter();
-    void setRate(float newRate);
-    void setDepth(float newDepth);
-    void setCentreFrequency(float newCentreFrequecy);
-    void setFeedback (float newFeedback);
-    void setMix (float newMix);
 
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
     AudioProcessorValueTreeState apvts;
+    
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FYPPhaserProjectAudioProcessor)
