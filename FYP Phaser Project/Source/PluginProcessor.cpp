@@ -198,14 +198,6 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
             lastOut = channelData[sample];
         }
     }
-    /*
-    if (totalNumInputChannels == 2)
-    {
-        buffer.addFrom(0, 0, buffer, 1, 0, buffer.getNumSamples());
-        buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
-        buffer.applyGain(0.5f);
-    }
-     */
 }
 
 //==============================================================================
