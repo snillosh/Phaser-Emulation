@@ -54,7 +54,7 @@ FYPPhaserProjectAudioProcessorEditor::FYPPhaserProjectAudioProcessorEditor (FYPP
     inGainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     inGainSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
     addAndMakeVisible(inGainSlider);
-    inLabel.setText("Input Gain", dontSendNotification);
+    inLabel.setText("Saturation", dontSendNotification);
     inLabel.attachToComponent(&inGainSlider, true);
     addAndMakeVisible(inLabel);
     

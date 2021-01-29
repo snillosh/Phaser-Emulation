@@ -15,9 +15,9 @@ FYPPhaserProjectAudioProcessor::FYPPhaserProjectAudioProcessor()
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+                       .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
                       #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+                       .withOutput ("Output", juce::AudioChannelSet::mono(), true)
                      #endif
                        ), apvts(*this, nullptr, "Parameters", createParameters())
 #endif
@@ -170,20 +170,17 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
     vibratoLFO.setFrequency(vibrato);
     for (auto n = 0; n < numStages; ++n)
     {
-        float phasePositionInHertz = ((lfo.nextSample() * 12650.0f) + 550.0f);
-        if (phasePositionInHertz < 0)
-            phasePositionInHertz = phasePositionInHertz * -1.0f;
+        float phasePositionInHertz = (lfo.nextSample() * 0.5f) + 0.5f;
+        phasePositionInHertz = (phasePositionInHertz * 19740.0f) + 260.0f;
         filters[n]->setCutoffFrequency(phasePositionInHertz);
     }
-    feedbackGain = vibratoLFO.nextSample();
-    if (feedbackGain < 0)
-        feedbackGain = feedbackGain * -1.0f;
+    feedbackGain = (vibratoLFO.nextSample() * 0.5f) + 0.5f;
 }
 
 float FYPPhaserProjectAudioProcessor::saturationTransfereFunction(float x)
 {
     float y = 0.0f;
-    float coeffA = 100.0f;
+    float coeffA = 2.0f;
     if (x > 0.0f && x <= 1.0f)
     {
         y = (coeffA/(coeffA-1.0f))*(1.0f - pow(coeffA, -x));
@@ -209,18 +206,16 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
         updateFilter();
-        feedbackSaturationValue = input * (allPassOutFinal * feedback);
+        feedbackSaturationValue = (allPassOutFinal * feedback);
         
         if (feedbackSaturationValue > 1)
             feedbackSaturationValue = 1;
         else if (feedbackSaturationValue < -1)
             feedbackSaturationValue = -1;
         
-        feedbackSaturationValue = saturationTransfereFunction(feedbackSaturationValue);
+        feedbackSaturationValue = (saturationTransfereFunction(feedbackSaturationValue) * input) + feedbackSaturationValue;
         
         feedbackSaturationValue = highpassFilter[0]->processSample(0, feedbackSaturationValue);
-        
-        feedbackSaturationValue = feedbackSaturationValue * output;
         
         float allPassOut1 = filters[0]->processSample(0, channelData[sample]) + feedbackSaturationValue;
         float allPassOut2 = filters[1]->processSample(0, allPassOut1);
@@ -271,12 +266,12 @@ AudioProcessorValueTreeState::ParameterLayout FYPPhaserProjectAudioProcessor::cr
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
     params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.002f, 0.500f, 0.01f));
-    params.push_back(std::make_unique<AudioParameterFloat>("MIX", "Mix", 0.1f, 1.0f, 0.7f));
-    params.push_back(std::make_unique<AudioParameterFloat>("FEEDBACK", "Feedback", 0.1f, 1.0f, 0.8f));
+    params.push_back(std::make_unique<AudioParameterFloat>("MIX", "Mix", 0.1f, 1.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("FEEDBACK", "Feedback", 0.0f, 0.99f, 0.8f));
     params.push_back(std::make_unique<AudioParameterFloat>("VIBRATO", "Vibrato", 0.001f, 1.000f, 0.00f ));
-    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH" , "Depth", 0.1f, 1.0f, 0.7f));
-    params.push_back(std::make_unique<AudioParameterFloat>("INPUT", "Input", 1.0f, 5.0f, 1.3f));
-    params.push_back(std::make_unique<AudioParameterFloat>("OUTPUT", "Ouput", 0.0f, 1.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH" , "Depth", 0.1f, 1.0f, 0.8f));
+    params.push_back(std::make_unique<AudioParameterFloat>("INPUT", "Input", 0.0f, .5f, 0.01f));
+    params.push_back(std::make_unique<AudioParameterFloat>("OUTPUT", "Ouput", 0.0f, 1.0f, 0.01f));
     
     
     return {params.begin(), params.end() };
