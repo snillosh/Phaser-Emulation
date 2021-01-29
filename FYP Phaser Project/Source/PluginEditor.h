@@ -30,10 +30,19 @@ private:
     Slider rateSlider;
     Slider depthSlider;
     Slider feedbackSlider;
+    Slider vibratoSlider;
+    Slider mixSlider;
+    Label rateLabel;
+    Label depthLabel;
+    Label feedbackLabel;
+    Label vibratoLabel;
+    Label mixLabel;
     
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> rateSliderAttachment;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> depthSliderAttachment;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> feedbackSliderAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> vibratoSliderAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> mixSliderAttachment;
     
     FYPPhaserProjectAudioProcessor& audioProcessor;
 

@@ -99,12 +99,17 @@ void FYPPhaserProjectAudioProcessor::changeProgramName (int index, const juce::S
 //==============================================================================
 void FYPPhaserProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    lastOut = 0.0f;
     lastSampleRate = sampleRate;
     dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
     spec.numChannels = getTotalNumInputChannels();
     spec.sampleRate = sampleRate;
+    
     lfo.setSampleRate(sampleRate);
+    
+    vibratoLFO.setSampleRate(sampleRate);
+    
     for (auto n = 0; n < numStages; ++n)
     {
         filters[n]->prepare (spec);
@@ -147,9 +152,13 @@ bool FYPPhaserProjectAudioProcessor::isBusesLayoutSupported (const BusesLayout& 
 void FYPPhaserProjectAudioProcessor::updateFilter()
 {
     rate = *apvts.getRawParameterValue("RATE");
-    depth = *apvts.getRawParameterValue("DEPTH");
+    mix = *apvts.getRawParameterValue("MIX");
     feedback = *apvts.getRawParameterValue("FEEDBACK");
+    vibrato = *apvts.getRawParameterValue("VIBRATO");
+    depth = *apvts.getRawParameterValue("DEPTH");
     lfo.setFrequency(rate);
+    lfo.setGain(depth);
+    vibratoLFO.setFrequency(vibrato);
     for (auto n = 0; n < numStages; ++n)
     {
         float phasePositionInHertz = ((lfo.nextSample() * 12650.0f) + 550.0f);
@@ -157,6 +166,9 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
             phasePositionInHertz = phasePositionInHertz * -1.0f;
         filters[n]->setCutoffFrequency(phasePositionInHertz);
     }
+    feedbackGain = vibratoLFO.nextSample();
+    if (feedbackGain < 0)
+        feedbackGain = feedbackGain * -1.0f;
 }
 
 void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -175,16 +187,25 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
         {
             updateFilter();
-            float allPassOut1 = filters[0]->processSample(channel, channelData[sample]) + (allPassOutFinal * feedback);
+            float allPassOut1 = filters[0]->processSample(channel, channelData[sample]) + (allPassOutFinal * feedback * feedbackGain);
             float allPassOut2 = filters[1]->processSample(channel, allPassOut1);
             float allPassOut3 = filters[2]->processSample(channel, allPassOut2);
             float allPassOut4 = filters[3]->processSample(channel, allPassOut3);
             float allPassOut5 = filters[4]->processSample(channel, allPassOut4);
             allPassOutFinal = filters[5]->processSample(channel, allPassOut5);
                 
-            channelData[sample] = (depth * allPassOutFinal) + ((1.0f - depth) * channelData[sample]);
+            channelData[sample] = (mix * allPassOutFinal) + ((1.0f - mix) * channelData[sample]);
+            lastOut = channelData[sample];
         }
     }
+    /*
+    if (totalNumInputChannels == 2)
+    {
+        buffer.addFrom(0, 0, buffer, 1, 0, buffer.getNumSamples());
+        buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
+        buffer.applyGain(0.5f);
+    }
+     */
 }
 
 //==============================================================================
@@ -223,8 +244,10 @@ AudioProcessorValueTreeState::ParameterLayout FYPPhaserProjectAudioProcessor::cr
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
     params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.002f, 1.000f, 0.020f));
-    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH", "Depth", 0.1f, 1.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("MIX", "Mix", 0.1f, 1.0f, 0.5f));
     params.push_back(std::make_unique<AudioParameterFloat>("FEEDBACK", "Feedback", 0.1f, 1.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("VIBRATO", "Vibrato", 0.001f, 1.000f, 0.02f ));
+    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH" , "Depth", 0.1f, 1.0f, 0.5f));
     
     return {params.begin(), params.end() };
 }

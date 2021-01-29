@@ -20,6 +20,8 @@ public:
     
     void setSampleRate(float newSampleRate);
     
+    void setGain(float newGain);
+    
     float nextSample();
     
     void setFrequency (float frequency);
@@ -30,4 +32,5 @@ private:
     float phasePosition = 0.f;
     float phaseIncrement = 0.f;
     float oscillatorFrequency = 0.5f;
+    float gain = 1.0f;
 };

@@ -31,7 +31,7 @@ float SinOscillator::nextSample()
     {
         phasePosition = phasePosition - MathConstants<float>::twoPi;
     }
-    return std::sin(phasePosition);
+    return std::sin(phasePosition) * gain;
 }
 
 void SinOscillator::setFrequency(float frequency)
@@ -42,4 +42,9 @@ void SinOscillator::setFrequency(float frequency)
 void SinOscillator::setSampleRate(float newSampleRate)
 {
     sampleRate = newSampleRate;
+}
+
+void SinOscillator::setGain(float newGain)
+{
+    gain = newGain;
 }

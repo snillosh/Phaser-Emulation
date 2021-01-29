@@ -64,10 +64,12 @@ private:
     float lastSampleRate;
     OwnedArray<juce::dsp::FirstOrderTPTFilter<float>> filters;
     SinOscillator lfo;
+    SinOscillator vibratoLFO;
     
-    float rate = 1.0f, depth = 0.5f, feedback = 0.0f, mix = 0.5f;
+    float rate = 1.0f, depth = 0.5f, feedback = 0.0f, mix = 0.5f, vibrato = 0.5f, feedbackGain = 0.5f;
+    double lastOut = 0.0f;
     float centreFrequency = 1300.0f;
-    int numStages = 6;
+    static constexpr int numStages = 6;
     double sampleRate = 44100.0;
     float allPassOutFinal = 1.0f;
     
