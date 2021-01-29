@@ -27,6 +27,8 @@ FYPPhaserProjectAudioProcessor::FYPPhaserProjectAudioProcessor()
         filters.add (new juce::dsp::FirstOrderTPTFilter<float>());
         filters[n]->setType (juce::dsp::FirstOrderTPTFilterType::allpass);
     }
+    highpassFilter.add(new juce::dsp::FirstOrderTPTFilter<float>());
+    highpassFilter[0]->setType(juce::dsp::FirstOrderTPTFilterType::highpass);
 }
 
 FYPPhaserProjectAudioProcessor::~FYPPhaserProjectAudioProcessor()
@@ -115,6 +117,9 @@ void FYPPhaserProjectAudioProcessor::prepareToPlay (double sampleRate, int sampl
         filters[n]->prepare (spec);
         filters[n]->reset();
     }
+    highpassFilter[0]->prepare(spec);
+    highpassFilter[0]->reset();
+    highpassFilter[0]->setCutoffFrequency(50);
 }
 
 void FYPPhaserProjectAudioProcessor::releaseResources()
@@ -156,6 +161,10 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
     feedback = *apvts.getRawParameterValue("FEEDBACK");
     vibrato = *apvts.getRawParameterValue("VIBRATO");
     depth = *apvts.getRawParameterValue("DEPTH");
+    input = (*apvts.getRawParameterValue("INPUT"));
+    output = *apvts.getRawParameterValue("OUTPUT");
+    output = output * output * output;
+    
     lfo.setFrequency(rate);
     lfo.setGain(depth);
     vibratoLFO.setFrequency(vibrato);
@@ -171,6 +180,21 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
         feedbackGain = feedbackGain * -1.0f;
 }
 
+float FYPPhaserProjectAudioProcessor::saturationTransfereFunction(float x)
+{
+    float y = 0.0f;
+    float coeffA = 100.0f;
+    if (x > 0.0f && x <= 1.0f)
+    {
+        y = (coeffA/(coeffA-1.0f))*(1.0f - pow(coeffA, -x));
+    }
+    else if (x <= 0.0f && x >= -1.0f)
+    {
+        y = (coeffA/(coeffA -1.0f))*(-1.0f + pow(coeffA, x));
+    }
+    return y;
+}
+
 void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
@@ -180,23 +204,34 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer(channel);
+        auto* channelData = buffer.getWritePointer(0);
         
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
-        {
-            updateFilter();
-            float allPassOut1 = filters[0]->processSample(channel, channelData[sample]) + (allPassOutFinal * feedback * feedbackGain);
-            float allPassOut2 = filters[1]->processSample(channel, allPassOut1);
-            float allPassOut3 = filters[2]->processSample(channel, allPassOut2);
-            float allPassOut4 = filters[3]->processSample(channel, allPassOut3);
-            float allPassOut5 = filters[4]->processSample(channel, allPassOut4);
-            allPassOutFinal = filters[5]->processSample(channel, allPassOut5);
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+    {
+        updateFilter();
+        feedbackSaturationValue = input * (allPassOutFinal * feedback);
+        
+        if (feedbackSaturationValue > 1)
+            feedbackSaturationValue = 1;
+        else if (feedbackSaturationValue < -1)
+            feedbackSaturationValue = -1;
+        
+        feedbackSaturationValue = saturationTransfereFunction(feedbackSaturationValue);
+        
+        feedbackSaturationValue = highpassFilter[0]->processSample(0, feedbackSaturationValue);
+        
+        feedbackSaturationValue = feedbackSaturationValue * output;
+        
+        float allPassOut1 = filters[0]->processSample(0, channelData[sample]) + feedbackSaturationValue;
+        float allPassOut2 = filters[1]->processSample(0, allPassOut1);
+        float allPassOut3 = filters[2]->processSample(0, allPassOut2);
+        float allPassOut4 = filters[3]->processSample(0, allPassOut3);
+        float allPassOut5 = filters[4]->processSample(0, allPassOut4);
+        allPassOutFinal = filters[5]->processSample(0, allPassOut5);
                 
-            channelData[sample] = (mix * allPassOutFinal) + ((1.0f - mix) * channelData[sample]);
-            lastOut = channelData[sample];
-        }
+        channelData[sample] = (mix * allPassOutFinal) + ((1.0f - mix) * channelData[sample]);
+        lastOut = channelData[sample];
+        buffer.copyFrom(1, 0, buffer, 0, 0, buffer.getNumSamples());
     }
 }
 
@@ -235,11 +270,14 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 AudioProcessorValueTreeState::ParameterLayout FYPPhaserProjectAudioProcessor::createParameters()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
-    params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.002f, 1.000f, 0.020f));
-    params.push_back(std::make_unique<AudioParameterFloat>("MIX", "Mix", 0.1f, 1.0f, 0.5f));
-    params.push_back(std::make_unique<AudioParameterFloat>("FEEDBACK", "Feedback", 0.1f, 1.0f, 0.5f));
-    params.push_back(std::make_unique<AudioParameterFloat>("VIBRATO", "Vibrato", 0.001f, 1.000f, 0.02f ));
-    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH" , "Depth", 0.1f, 1.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.002f, 0.500f, 0.01f));
+    params.push_back(std::make_unique<AudioParameterFloat>("MIX", "Mix", 0.1f, 1.0f, 0.7f));
+    params.push_back(std::make_unique<AudioParameterFloat>("FEEDBACK", "Feedback", 0.1f, 1.0f, 0.8f));
+    params.push_back(std::make_unique<AudioParameterFloat>("VIBRATO", "Vibrato", 0.001f, 1.000f, 0.00f ));
+    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH" , "Depth", 0.1f, 1.0f, 0.7f));
+    params.push_back(std::make_unique<AudioParameterFloat>("INPUT", "Input", 1.0f, 5.0f, 1.3f));
+    params.push_back(std::make_unique<AudioParameterFloat>("OUTPUT", "Ouput", 0.0f, 1.0f, 0.5f));
+    
     
     return {params.begin(), params.end() };
 }

@@ -51,6 +51,7 @@ public:
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
     void updateFilter();
+    float saturationTransfereFunction(float x);
 
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
@@ -63,10 +64,11 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FYPPhaserProjectAudioProcessor)
     float lastSampleRate;
     OwnedArray<juce::dsp::FirstOrderTPTFilter<float>> filters;
+    OwnedArray<juce::dsp::FirstOrderTPTFilter<float>> highpassFilter;
     SinOscillator lfo;
     SinOscillator vibratoLFO;
     
-    float rate = 1.0f, depth = 0.5f, feedback = 0.0f, mix = 0.5f, vibrato = 0.5f, feedbackGain = 0.5f;
+    float rate = 1.0f, depth = 0.5f, feedback = 0.0f, mix = 0.5f, vibrato = 0.5f, feedbackGain = 0.5f, input = 1.0f, output = 1.0f, feedbackSaturationValue, noise;
     double lastOut = 0.0f;
     float centreFrequency = 1300.0f;
     static constexpr int numStages = 6;

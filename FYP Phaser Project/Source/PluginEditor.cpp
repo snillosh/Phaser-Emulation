@@ -51,6 +51,21 @@ FYPPhaserProjectAudioProcessorEditor::FYPPhaserProjectAudioProcessorEditor (FYPP
     mixLabel.attachToComponent(&mixSlider, true);
     addAndMakeVisible(mixLabel);
     
+    inGainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    inGainSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(inGainSlider);
+    inLabel.setText("Input Gain", dontSendNotification);
+    inLabel.attachToComponent(&inGainSlider, true);
+    addAndMakeVisible(inLabel);
+    
+    outGainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    outGainSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
+    addAndMakeVisible(outGainSlider);
+    outLabel.setText("Output Gain", dontSendNotification);
+    outLabel.attachToComponent(&outGainSlider, true);
+    addAndMakeVisible(outLabel);
+    
+    
     rateSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "RATE", rateSlider);
     
     depthSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "DEPTH", depthSlider);
@@ -60,6 +75,10 @@ FYPPhaserProjectAudioProcessorEditor::FYPPhaserProjectAudioProcessorEditor (FYPP
     vibratoSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "VIBRATO", vibratoSlider);
     
     mixSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "MIX", mixSlider);
+    
+    inGainSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "INPUT", inGainSlider);
+    
+    outGainSliderAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(audioProcessor.apvts, "OUTPUT", outGainSlider);
 }
 
 FYPPhaserProjectAudioProcessorEditor::~FYPPhaserProjectAudioProcessorEditor()
@@ -79,4 +98,6 @@ void FYPPhaserProjectAudioProcessorEditor::resized()
     feedbackSlider.setBounds(200, 100, 200, 100);
     vibratoSlider.setBounds(500, 0 , 200, 100);
     mixSlider.setBounds(200, 200, 200, 100);
+    inGainSlider.setBounds(200, 300, 200, 100);
+    outGainSlider.setBounds(500, 300, 200, 100);
 }
