@@ -171,7 +171,7 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
     for (auto n = 0; n < numStages; ++n)
     {
         float phasePositionInHertz = (lfo.nextSample() * 0.5f) + 0.5f;
-        phasePositionInHertz = (phasePositionInHertz * 19740.0f) + 260.0f;
+        phasePositionInHertz = (phasePositionInHertz * 19900.0f) + 100.0f;
         filters[n]->setCutoffFrequency(phasePositionInHertz);
     }
     feedbackGain = (vibratoLFO.nextSample() * 0.5f) + 0.5f;
@@ -217,7 +217,7 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         
         feedbackSaturationValue = highpassFilter[0]->processSample(0, feedbackSaturationValue);
         
-        float allPassOut1 = filters[0]->processSample(0, channelData[sample]) + feedbackSaturationValue;
+        float allPassOut1 = filters[0]->processSample(0, channelData[sample]) + feedbackSaturationValue + (random.nextFloat() * 0.00025f - 0.000125f);
         float allPassOut2 = filters[1]->processSample(0, allPassOut1);
         float allPassOut3 = filters[2]->processSample(0, allPassOut2);
         float allPassOut4 = filters[3]->processSample(0, allPassOut3);
