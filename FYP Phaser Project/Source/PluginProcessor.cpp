@@ -26,6 +26,7 @@ FYPPhaserProjectAudioProcessor::FYPPhaserProjectAudioProcessor()
     {
         filters.add (new juce::dsp::FirstOrderTPTFilter<float>());
         filters[n]->setType (juce::dsp::FirstOrderTPTFilterType::allpass);
+        filters[n]->snapToZero();
     }
     highpassFilter.add(new juce::dsp::FirstOrderTPTFilter<float>());
     highpassFilter[0]->setType(juce::dsp::FirstOrderTPTFilterType::highpass);
@@ -171,8 +172,9 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
     for (auto n = 0; n < numStages; ++n)
     {
         float phasePositionInHertz = (lfo.nextSample() * 0.5f) + 0.5f;
-        phasePositionInHertz = (phasePositionInHertz * 19900.0f) + 100.0f;
+        phasePositionInHertz = (phasePositionInHertz * 9702.0f) + 98.0f;
         filters[n]->setCutoffFrequency(phasePositionInHertz);
+        filters[n]->snapToZero();
     }
     feedbackGain = (vibratoLFO.nextSample() * 0.5f) + 0.5f;
 }
@@ -215,14 +217,12 @@ void FYPPhaserProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         
         feedbackSaturationValue = (saturationTransfereFunction(feedbackSaturationValue) * input) + feedbackSaturationValue;
         
-        feedbackSaturationValue = highpassFilter[0]->processSample(0, feedbackSaturationValue);
+        //feedbackSaturationValue = highpassFilter[0]->processSample(0, feedbackSaturationValue);
         
         float allPassOut1 = filters[0]->processSample(0, channelData[sample]) + feedbackSaturationValue + (random.nextFloat() * 0.00025f - 0.000125f);
         float allPassOut2 = filters[1]->processSample(0, allPassOut1);
         float allPassOut3 = filters[2]->processSample(0, allPassOut2);
-        float allPassOut4 = filters[3]->processSample(0, allPassOut3);
-        float allPassOut5 = filters[4]->processSample(0, allPassOut4);
-        allPassOutFinal = filters[5]->processSample(0, allPassOut5);
+        allPassOutFinal = filters[3]->processSample(0, allPassOut3);
                 
         channelData[sample] = (mix * allPassOutFinal) + ((1.0f - mix) * channelData[sample]);
         lastOut = channelData[sample];

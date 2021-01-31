@@ -72,7 +72,7 @@ private:
     float rate = 1.0f, depth = 0.5f, feedback = 0.0f, mix = 0.5f, vibrato = 0.5f, feedbackGain = 0.5f, input = 1.0f, output = 1.0f, feedbackSaturationValue, noise;
     double lastOut = 0.0f;
     float centreFrequency = 1300.0f;
-    static constexpr int numStages = 6;
+    static constexpr int numStages = 4;
     double sampleRate = 44100.0;
     float allPassOutFinal = 1.0f;
     
