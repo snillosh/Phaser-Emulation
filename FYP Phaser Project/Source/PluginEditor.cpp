@@ -19,7 +19,7 @@ FYPPhaserProjectAudioProcessorEditor::FYPPhaserProjectAudioProcessorEditor (FYPP
     rateSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
     rateSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 100, 50);
     addAndMakeVisible(rateSlider);
-    rateLabel.setText("Rate", dontSendNotification);
+    rateLabel.setText("LFO Rate", dontSendNotification);
     rateLabel.attachToComponent(&rateSlider, true);
     addAndMakeVisible(rateLabel);
     

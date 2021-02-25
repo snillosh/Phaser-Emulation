@@ -15,9 +15,9 @@ FYPPhaserProjectAudioProcessor::FYPPhaserProjectAudioProcessor()
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
+                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
-                       .withOutput ("Output", juce::AudioChannelSet::mono(), true)
+                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ), apvts(*this, nullptr, "Parameters", createParameters())
 #endif
@@ -172,7 +172,7 @@ void FYPPhaserProjectAudioProcessor::updateFilter()
     for (auto n = 0; n < numStages; ++n)
     {
         float phasePositionInHertz = (lfo.nextSample() * 0.5f) + 0.5f;
-        phasePositionInHertz = (phasePositionInHertz * 9702.0f) + 98.0f;
+        phasePositionInHertz = (phasePositionInHertz * 4980.0f) + 20.0f;
         filters[n]->setCutoffFrequency(phasePositionInHertz);
         filters[n]->snapToZero();
     }
@@ -265,11 +265,11 @@ juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 AudioProcessorValueTreeState::ParameterLayout FYPPhaserProjectAudioProcessor::createParameters()
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
-    params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.002f, 0.500f, 0.01f));
+    params.push_back(std::make_unique<AudioParameterFloat>("RATE", "Rate", 0.002f, 0.500f, 0.03f));
     params.push_back(std::make_unique<AudioParameterFloat>("MIX", "Mix", 0.1f, 1.0f, 0.5f));
     params.push_back(std::make_unique<AudioParameterFloat>("FEEDBACK", "Feedback", 0.0f, 0.99f, 0.8f));
     params.push_back(std::make_unique<AudioParameterFloat>("VIBRATO", "Vibrato", 0.001f, 1.000f, 0.00f ));
-    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH" , "Depth", 0.1f, 1.0f, 0.8f));
+    params.push_back(std::make_unique<AudioParameterFloat>("DEPTH" , "Depth", 0.1f, 1.0f, 1.0f));
     params.push_back(std::make_unique<AudioParameterFloat>("INPUT", "Input", 0.0f, .5f, 0.01f));
     params.push_back(std::make_unique<AudioParameterFloat>("OUTPUT", "Ouput", 0.0f, 1.0f, 0.01f));
     
